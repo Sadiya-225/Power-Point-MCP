@@ -8,5 +8,7 @@ __pycache__/
 # Logs and caches
 *.log
 
+.env
+
 # VSCode config
 .vscode/
