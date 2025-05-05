@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerPoint MCP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <div class="nav-item"></div>
+            <div class="nav-item"></div>
+            <div class="nav-item"></div>
+            <div class="nav-item"></div>
+            <div class="nav-item nav-circle"></div>
+        </div>
+        
+        <div class="content">
+            <h1>PowerPoint MCP</h1>
+            <p>Generate PowerPoint presentations using AI</p>
+            
+            <form id="presentation-form">
+                <div class="prompt-container">
+                    <textarea id="prompt" name="prompt" placeholder="Enter your presentation prompt here..."></textarea>
+                    <button type="submit" id="generate-btn">Generate</button>
+                </div>
+            </form>
+            
+            <div class="template-grid">
+                <div class="template-item"></div>
+                <div class="template-item"></div>
+                <div class="template-item"></div>
+                <div class="template-item"></div>
+                <div class="template-item"></div>
+                <div class="template-item"></div>
+            </div>
+            
+            <div id="status" class="status-container"></div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
