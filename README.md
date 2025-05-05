@@ -16,7 +16,7 @@ This project is a Flask-based web application that generates PowerPoint presenta
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/Sadiya-125/Power-Point-MCP
+   git clone https://github.com/Sadiya-125/Power-Point-MCP.git
    cd Power-Point-MCP
    ```
 
