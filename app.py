@@ -9,7 +9,7 @@ from flask_cors import CORS
 
 # Initialize Flask application
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "OPTIONS"]}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Load configuration
 from config import DEBUG, HOST, PORT, GEMINI_API_KEY

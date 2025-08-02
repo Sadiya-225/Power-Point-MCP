@@ -11,25 +11,120 @@ class GeminiClient:
         genai.configure(api_key=self.api_key)
         
         # Create model instance with the correct model name
-        self.model = genai.GenerativeModel('gemini-2.0-pro-exp')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
     
     def generate_macro(self, prompt):
         """Generate PowerPoint VBA macro using Gemini API"""
         enhanced_prompt = f"""
-            Create a complete, self-contained PowerPoint VBA macro for a presentation on the following resume content: "{prompt}"
+            Create a complete, self-contained PowerPoint VBA macro for a presentation based on this resume content: "{prompt}"
 
+            Use this exact template structure and fill in the placeholders with relevant information from the resume:
+
+            ```
+            Sub Main()
+                ' PowerPoint VBA Macro Template
+                ' Constants for PowerPoint layouts
+                Const ppLayoutTitle = 1
+                Const ppLayoutTitleAndContent = 2
+                Const ppLayoutText = 3
+                Const ppLayoutTwoContent = 4
+                
+                ' Color constants
+                Const HOT_PINK = 12058879 ' RGB(255, 0, 184)
+                Const DARK_BLUE = 15773696 ' RGB(0, 32, 96)
+                Const WHITE = 16777215 ' RGB(255, 255, 255)
+                
+                ' Get active presentation
+                Dim pres As Presentation
+                Set pres = ActivePresentation
+                
+                ' Clear existing slides
+                While pres.Slides.Count > 0
+                    pres.Slides(1).Delete
+                Wend
+                
+                ' Slide 1: Title Slide
+                Dim slide1 As Slide
+                Set slide1 = pres.Slides.Add(1, ppLayoutTitle)
+                slide1.Shapes.Title.TextFrame.TextRange.Text = "[FULL_NAME]"
+                slide1.Shapes(2).TextFrame.TextRange.Text = "[PROFESSIONAL_TITLE]" & vbNewLine & "[CONTACT_INFO]"
+                
+                ' Format title slide
+                FormatSlide slide1, HOT_PINK, DARK_BLUE
+                
+                ' Slide 2: Professional Summary
+                Dim slide2 As Slide
+                Set slide2 = pres.Slides.Add(2, ppLayoutTitleAndContent)
+                slide2.Shapes.Title.TextFrame.TextRange.Text = "Professional Summary"
+                slide2.Shapes(2).TextFrame.TextRange.Text = "[PROFESSIONAL_SUMMARY]"
+                
+                ' Slide 3: Skills
+                Dim slide3 As Slide
+                Set slide3 = pres.Slides.Add(3, ppLayoutTitleAndContent)
+                slide3.Shapes.Title.TextFrame.TextRange.Text = "Technical Skills"
+                slide3.Shapes(2).TextFrame.TextRange.Text = "[SKILLS_LIST]"
+                
+                ' Slide 4: Work Experience
+                Dim slide4 As Slide
+                Set slide4 = pres.Slides.Add(4, ppLayoutTitleAndContent)
+                slide4.Shapes.Title.TextFrame.TextRange.Text = "Work Experience"
+                slide4.Shapes(2).TextFrame.TextRange.Text = "[WORK_EXPERIENCE]"
+                
+                ' Slide 5: Education
+                Dim slide5 As Slide
+                Set slide5 = pres.Slides.Add(5, ppLayoutTitleAndContent)
+                slide5.Shapes.Title.TextFrame.TextRange.Text = "Education"
+                slide5.Shapes(2).TextFrame.TextRange.Text = "[EDUCATION_DETAILS]"
+                
+                ' Slide 6: Projects
+                Dim slide6 As Slide
+                Set slide6 = pres.Slides.Add(6, ppLayoutTitleAndContent)
+                slide6.Shapes.Title.TextFrame.TextRange.Text = "Key Projects"
+                slide6.Shapes(2).TextFrame.TextRange.Text = "[PROJECTS_DETAILS]"
+                
+                ' Format all slides
+                FormatSlide slide2, HOT_PINK, DARK_BLUE
+                FormatSlide slide3, HOT_PINK, DARK_BLUE
+                FormatSlide slide4, HOT_PINK, DARK_BLUE
+                FormatSlide slide5, HOT_PINK, DARK_BLUE
+                FormatSlide slide6, HOT_PINK, DARK_BLUE
+            End Sub
+
+            Sub FormatSlide(slide As Slide, titleColor As Long, bgColor As Long)
+                ' Format slide title
+                slide.Shapes.Title.TextFrame.TextRange.Font.Name = "Arial"
+                slide.Shapes.Title.TextFrame.TextRange.Font.Size = 44
+                slide.Shapes.Title.TextFrame.TextRange.Font.Color.RGB = titleColor
+                slide.Shapes.Title.TextFrame.TextRange.Font.Bold = True
+                
+                ' Format slide content
+                If slide.Shapes.Count > 1 Then
+                    slide.Shapes(2).TextFrame.TextRange.Font.Name = "Arial"
+                    slide.Shapes(2).TextFrame.TextRange.Font.Size = 24
+                    slide.Shapes(2).TextFrame.TextRange.Font.Color.RGB = WHITE
+                End If
+                
+                ' Set background
+                slide.Background.Fill.ForeColor.RGB = bgColor
+            End Sub
+            ```
+
+            INSTRUCTIONS:
+            1. Replace [FULL_NAME] with the person's full name from the resume
+            2. Replace [PROFESSIONAL_TITLE] with their current role or a professional title
+            3. Replace [CONTACT_INFO] with email, phone, and LinkedIn (formatted nicely)
+            4. Replace [PROFESSIONAL_SUMMARY] with a concise 2-3 sentence summary
+            5. Replace [SKILLS_LIST] with key technical skills formatted as bullet points
+            6. Replace [WORK_EXPERIENCE] with job title, company, duration, and key achievements
+            7. Replace [EDUCATION_DETAILS] with degree, institution, and GPA/achievements
+            8. Replace [PROJECTS_DETAILS] with project names, descriptions, and outcomes
+            
             Requirements:
-            1. The macro MUST be a complete, executable VBA script with Sub Main() as the entry point
-            2. The macro should create a PowerPoint presentation with 6 slides, each with a title and content
-            3. Use hot pink (#FF00B8) for titles and dark blue (#002060) for backgrounds
-            4. Use Arial font for all text and set the font size to 44 for titles and 24 for content
-            5. IMPORTANT: Define ALL PowerPoint constants explicitly at the top of your code (e.g., Const ppLayoutTitle = 1, Const ppLayoutTitleAndContent = 2, etc.)
-            6. DO NOT include any explanatory text, only provide the VBA code
-            7. The code must be fully functional without any external requirements
-            8. IMPORTANT: Use ONLY ASCII characters in the code (no special characters, emojis, or non-ASCII symbols)
-            9. Replace any non-ASCII characters with their ASCII equivalents (e.g., use ' instead of ')
-
-            Format: Return ONLY the complete VBA code without any explanation or additional text.
+            - Use ONLY ASCII characters (no special symbols, emojis, or non-ASCII characters)
+            - Keep content concise and professional
+            - Format bullet points using "• "
+            - Ensure all placeholders are replaced with actual resume content
+            - Return ONLY the complete VBA code without any explanation
             """
         
         try:
@@ -69,50 +164,89 @@ class GeminiClient:
             # Return a default VBA script in case of failure
             return """
             Sub Main()
-                ' Default PowerPoint macro
+                ' PowerPoint VBA Macro Template
+                ' Constants for PowerPoint layouts
+                Const ppLayoutTitle = 1
+                Const ppLayoutTitleAndContent = 2
+                Const ppLayoutText = 3
+                Const ppLayoutTwoContent = 4
                 
-                ' Create presentation
+                ' Color constants
+                Const HOT_PINK = 12058879 ' RGB(255, 0, 184)
+                Const DARK_BLUE = 15773696 ' RGB(0, 32, 96)
+                Const WHITE = 16777215 ' RGB(255, 255, 255)
+                
+                ' Get active presentation
                 Dim pres As Presentation
                 Set pres = ActivePresentation
-                
-                ' Define colors
-                Const HOT_PINK = 12058879 ' RGB(255, 0, 184)
-                Const ELECTRIC_PURPLE = 16711841 ' RGB(161, 0, 255)
                 
                 ' Clear existing slides
                 While pres.Slides.Count > 0
                     pres.Slides(1).Delete
                 Wend
                 
-                ' Add title slide
-                Dim titleSlide As Slide
-                Set titleSlide = pres.Slides.Add(1, ppLayoutTitle)
-                titleSlide.Shapes.Title.TextFrame.TextRange.Text = "Generated Presentation"
+                ' Slide 1: Title Slide
+                Dim slide1 As Slide
+                Set slide1 = pres.Slides.Add(1, ppLayoutTitle)
+                slide1.Shapes.Title.TextFrame.TextRange.Text = "John Doe"
+                slide1.Shapes(2).TextFrame.TextRange.Text = "Software Engineer" & vbNewLine & "john.doe@example.com | (555) 123-4567 | LinkedIn: linkedin.com/in/johndoe"
                 
-                ' Format title
-                titleSlide.Shapes.Title.TextFrame.TextRange.Font.Color.RGB = HOT_PINK
-                titleSlide.Shapes.Title.TextFrame.TextRange.Font.Size = 44
+                ' Format title slide
+                FormatSlide slide1, HOT_PINK, DARK_BLUE
                 
-                ' Set background
-                titleSlide.Background.Fill.ForeColor.RGB = ELECTRIC_PURPLE
+                ' Slide 2: Professional Summary
+                Dim slide2 As Slide
+                Set slide2 = pres.Slides.Add(2, ppLayoutTitleAndContent)
+                slide2.Shapes.Title.TextFrame.TextRange.Text = "Professional Summary"
+                slide2.Shapes(2).TextFrame.TextRange.Text = "Experienced software engineer with expertise in full-stack development and machine learning. Passionate about creating innovative solutions and leading technical projects. Demonstrated ability to deliver high-quality software products and mentor junior developers."
                 
-                ' Add content slides
-                AddContentSlide "Overview", "• Point 1" & vbNewLine & "• Point 2" & vbNewLine & "• Point 3"
-                AddContentSlide "Details", "• More information" & vbNewLine & "• Additional details" & vbNewLine & "• Technical aspects"
-                AddContentSlide "Summary", "• Recap" & vbNewLine & "• Conclusion" & vbNewLine & "• Next steps"
+                ' Slide 3: Skills
+                Dim slide3 As Slide
+                Set slide3 = pres.Slides.Add(3, ppLayoutTitleAndContent)
+                slide3.Shapes.Title.TextFrame.TextRange.Text = "Technical Skills"
+                slide3.Shapes(2).TextFrame.TextRange.Text = "Programming Languages: Python, JavaScript, Java, C++" & vbNewLine & "Web Technologies: React, Node.js, Express, Django" & vbNewLine & "Database: PostgreSQL, MongoDB, Redis" & vbNewLine & "Cloud Platforms: AWS, Azure, Google Cloud" & vbNewLine & "Tools: Git, Docker, Kubernetes, Jenkins"
+                
+                ' Slide 4: Work Experience
+                Dim slide4 As Slide
+                Set slide4 = pres.Slides.Add(4, ppLayoutTitleAndContent)
+                slide4.Shapes.Title.TextFrame.TextRange.Text = "Work Experience"
+                slide4.Shapes(2).TextFrame.TextRange.Text = "Senior Software Engineer at TechCorp (2022-Present)" & vbNewLine & "Led development of microservices architecture serving 1M+ users" & vbNewLine & "Mentored 5 junior developers and improved team productivity by 30%" & vbNewLine & "Implemented CI/CD pipeline reducing deployment time by 60%"
+                
+                ' Slide 5: Education
+                Dim slide5 As Slide
+                Set slide5 = pres.Slides.Add(5, ppLayoutTitleAndContent)
+                slide5.Shapes.Title.TextFrame.TextRange.Text = "Education"
+                slide5.Shapes(2).TextFrame.TextRange.Text = "Bachelor of Science in Computer Science" & vbNewLine & "University of Technology (2018-2022)" & vbNewLine & "GPA: 3.8/4.0" & vbNewLine & "Dean's List: All semesters" & vbNewLine & "Relevant Coursework: Data Structures, Algorithms, Software Engineering"
+                
+                ' Slide 6: Projects
+                Dim slide6 As Slide
+                Set slide6 = pres.Slides.Add(6, ppLayoutTitleAndContent)
+                slide6.Shapes.Title.TextFrame.TextRange.Text = "Key Projects"
+                slide6.Shapes(2).TextFrame.TextRange.Text = "E-Commerce Platform (2023)" & vbNewLine & "Built full-stack application using React and Node.js" & vbNewLine & "Integrated payment processing and inventory management" & vbNewLine & "Deployed on AWS with 99.9% uptime" & vbNewLine & vbNewLine & "AI Chatbot Assistant (2022)" & vbNewLine & "Developed NLP-powered customer service chatbot" & vbNewLine & "Reduced support tickets by 40% and improved response time"
+                
+                ' Format all slides
+                FormatSlide slide2, HOT_PINK, DARK_BLUE
+                FormatSlide slide3, HOT_PINK, DARK_BLUE
+                FormatSlide slide4, HOT_PINK, DARK_BLUE
+                FormatSlide slide5, HOT_PINK, DARK_BLUE
+                FormatSlide slide6, HOT_PINK, DARK_BLUE
             End Sub
 
-            Sub AddContentSlide(title As String, content As String)
-                ' Add a content slide
-                Dim slide As Slide
-                Set slide = ActivePresentation.Slides.Add(ActivePresentation.Slides.Count + 1, ppLayoutText)
+            Sub FormatSlide(slide As Slide, titleColor As Long, bgColor As Long)
+                ' Format slide title
+                slide.Shapes.Title.TextFrame.TextRange.Font.Name = "Arial"
+                slide.Shapes.Title.TextFrame.TextRange.Font.Size = 44
+                slide.Shapes.Title.TextFrame.TextRange.Font.Color.RGB = titleColor
+                slide.Shapes.Title.TextFrame.TextRange.Font.Bold = True
                 
-                ' Set title and content
-                slide.Shapes.Title.TextFrame.TextRange.Text = title
-                slide.Shapes(2).TextFrame.TextRange.Text = content
+                ' Format slide content
+                If slide.Shapes.Count > 1 Then
+                    slide.Shapes(2).TextFrame.TextRange.Font.Name = "Arial"
+                    slide.Shapes(2).TextFrame.TextRange.Font.Size = 24
+                    slide.Shapes(2).TextFrame.TextRange.Font.Color.RGB = WHITE
+                End If
                 
-                ' Format
-                slide.Shapes.Title.TextFrame.TextRange.Font.Color.RGB = 12058879 ' Hot Pink
-                slide.Background.Fill.ForeColor.RGB = 16711841 ' Electric Purple
+                ' Set background
+                slide.Background.Fill.ForeColor.RGB = bgColor
             End Sub
             """
