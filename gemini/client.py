@@ -11,8 +11,30 @@ class GeminiClient:
         genai.configure(api_key=self.api_key)
         
         # Create model instance with the correct model name
-        self.model = genai.GenerativeModel('gemini-2.5-flash')
+        self.model = genai.GenerativeModel('gemini-2.5-flash-lite')
     
+    def extract_resume_data(self, resume_content):
+        """Extract key information from resume content"""
+        lines = resume_content.split('\n')
+
+        # Try to extract name (first line is usually the name)
+        name = "Resume"
+        email = "user@example.com"
+
+        for line in lines:
+            if '@' in line:  # Found email
+                email = line.split()[0] if ' ' in line else line
+            # First non-empty line might be name
+            if line.strip() and not name.startswith("##"):
+                name = line.replace("##", "").replace("<div", "").replace("</div>", "").strip()
+                if name and len(name) > 0:
+                    break
+
+        # Clean up name
+        name = re.sub(r'[<>"/|]', '', name).strip()[:50] or "Resume"
+
+        return name, email
+
     def generate_macro(self, prompt):
         """Generate PowerPoint VBA macro using Gemini API"""
         enhanced_prompt = f"""
@@ -161,69 +183,72 @@ class GeminiClient:
                 
         except Exception as e:
             print(f"Error calling Gemini API: {e}")
-            # Return a default VBA script in case of failure
-            return """
+            # Extract actual resume data for the fallback
+            name, email = self.extract_resume_data(prompt)
+
+            # Return a VBA script using extracted resume data
+            return f"""
             Sub Main()
-                ' PowerPoint VBA Macro Template
+                ' PowerPoint VBA Macro - Generated from Resume
                 ' Constants for PowerPoint layouts
                 Const ppLayoutTitle = 1
                 Const ppLayoutTitleAndContent = 2
                 Const ppLayoutText = 3
                 Const ppLayoutTwoContent = 4
-                
+
                 ' Color constants
                 Const HOT_PINK = 12058879 ' RGB(255, 0, 184)
                 Const DARK_BLUE = 15773696 ' RGB(0, 32, 96)
                 Const WHITE = 16777215 ' RGB(255, 255, 255)
-                
+
                 ' Get active presentation
                 Dim pres As Presentation
                 Set pres = ActivePresentation
-                
+
                 ' Clear existing slides
                 While pres.Slides.Count > 0
                     pres.Slides(1).Delete
                 Wend
-                
+
                 ' Slide 1: Title Slide
                 Dim slide1 As Slide
                 Set slide1 = pres.Slides.Add(1, ppLayoutTitle)
-                slide1.Shapes.Title.TextFrame.TextRange.Text = "John Doe"
-                slide1.Shapes(2).TextFrame.TextRange.Text = "Software Engineer" & vbNewLine & "john.doe@example.com | (555) 123-4567 | LinkedIn: linkedin.com/in/johndoe"
-                
+                slide1.Shapes.Title.TextFrame.TextRange.Text = "{name}"
+                slide1.Shapes(2).TextFrame.TextRange.Text = "Professional Resume" & vbNewLine & "{email}"
+
                 ' Format title slide
                 FormatSlide slide1, HOT_PINK, DARK_BLUE
-                
+
                 ' Slide 2: Professional Summary
                 Dim slide2 As Slide
                 Set slide2 = pres.Slides.Add(2, ppLayoutTitleAndContent)
                 slide2.Shapes.Title.TextFrame.TextRange.Text = "Professional Summary"
-                slide2.Shapes(2).TextFrame.TextRange.Text = "Experienced software engineer with expertise in full-stack development and machine learning. Passionate about creating innovative solutions and leading technical projects. Demonstrated ability to deliver high-quality software products and mentor junior developers."
-                
+                slide2.Shapes(2).TextFrame.TextRange.Text = "See complete resume for detailed information about professional background, skills, experience, and achievements."
+
                 ' Slide 3: Skills
                 Dim slide3 As Slide
                 Set slide3 = pres.Slides.Add(3, ppLayoutTitleAndContent)
                 slide3.Shapes.Title.TextFrame.TextRange.Text = "Technical Skills"
-                slide3.Shapes(2).TextFrame.TextRange.Text = "Programming Languages: Python, JavaScript, Java, C++" & vbNewLine & "Web Technologies: React, Node.js, Express, Django" & vbNewLine & "Database: PostgreSQL, MongoDB, Redis" & vbNewLine & "Cloud Platforms: AWS, Azure, Google Cloud" & vbNewLine & "Tools: Git, Docker, Kubernetes, Jenkins"
-                
+                slide3.Shapes(2).TextFrame.TextRange.Text = "See resume for complete list of technical skills, programming languages, and tools."
+
                 ' Slide 4: Work Experience
                 Dim slide4 As Slide
                 Set slide4 = pres.Slides.Add(4, ppLayoutTitleAndContent)
                 slide4.Shapes.Title.TextFrame.TextRange.Text = "Work Experience"
-                slide4.Shapes(2).TextFrame.TextRange.Text = "Senior Software Engineer at TechCorp (2022-Present)" & vbNewLine & "Led development of microservices architecture serving 1M+ users" & vbNewLine & "Mentored 5 junior developers and improved team productivity by 30%" & vbNewLine & "Implemented CI/CD pipeline reducing deployment time by 60%"
-                
+                slide4.Shapes(2).TextFrame.TextRange.Text = "See resume for detailed work history and achievements."
+
                 ' Slide 5: Education
                 Dim slide5 As Slide
                 Set slide5 = pres.Slides.Add(5, ppLayoutTitleAndContent)
                 slide5.Shapes.Title.TextFrame.TextRange.Text = "Education"
-                slide5.Shapes(2).TextFrame.TextRange.Text = "Bachelor of Science in Computer Science" & vbNewLine & "University of Technology (2018-2022)" & vbNewLine & "GPA: 3.8/4.0" & vbNewLine & "Dean's List: All semesters" & vbNewLine & "Relevant Coursework: Data Structures, Algorithms, Software Engineering"
-                
+                slide5.Shapes(2).TextFrame.TextRange.Text = "See resume for educational background and qualifications."
+
                 ' Slide 6: Projects
                 Dim slide6 As Slide
                 Set slide6 = pres.Slides.Add(6, ppLayoutTitleAndContent)
                 slide6.Shapes.Title.TextFrame.TextRange.Text = "Key Projects"
-                slide6.Shapes(2).TextFrame.TextRange.Text = "E-Commerce Platform (2023)" & vbNewLine & "Built full-stack application using React and Node.js" & vbNewLine & "Integrated payment processing and inventory management" & vbNewLine & "Deployed on AWS with 99.9% uptime" & vbNewLine & vbNewLine & "AI Chatbot Assistant (2022)" & vbNewLine & "Developed NLP-powered customer service chatbot" & vbNewLine & "Reduced support tickets by 40% and improved response time"
-                
+                slide6.Shapes(2).TextFrame.TextRange.Text = "See resume for portfolio and key project details."
+
                 ' Format all slides
                 FormatSlide slide2, HOT_PINK, DARK_BLUE
                 FormatSlide slide3, HOT_PINK, DARK_BLUE
@@ -238,14 +263,14 @@ class GeminiClient:
                 slide.Shapes.Title.TextFrame.TextRange.Font.Size = 44
                 slide.Shapes.Title.TextFrame.TextRange.Font.Color.RGB = titleColor
                 slide.Shapes.Title.TextFrame.TextRange.Font.Bold = True
-                
+
                 ' Format slide content
                 If slide.Shapes.Count > 1 Then
                     slide.Shapes(2).TextFrame.TextRange.Font.Name = "Arial"
                     slide.Shapes(2).TextFrame.TextRange.Font.Size = 24
                     slide.Shapes(2).TextFrame.TextRange.Font.Color.RGB = WHITE
                 End If
-                
+
                 ' Set background
                 slide.Background.Fill.ForeColor.RGB = bgColor
             End Sub
